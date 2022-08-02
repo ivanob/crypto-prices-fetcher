@@ -1,0 +1,16 @@
+{
+  "name": "@monorepo/aws-cron-crypto-prices-fetcher",
+  "version": "1.0.0",
+  "description": "Example of creating a function that runs as a cron job using the serverless `schedule` event",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "compile": "tsc"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.655.0",
+    "@types/aws-lambda": "^8.10.51",
+    "@types/node": "^13.13.5",
+    "typescript": "^3.8.3"
+  }
+}

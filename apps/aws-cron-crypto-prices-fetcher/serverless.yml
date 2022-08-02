@@ -1,0 +1,16 @@
+org: ivanob
+app: events-checker-cron-task
+service: aws-cron-crypto-prices-fetcher
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+functions:
+  pricesHandler:
+    handler: built/handler.run
+    events:
+      # Invoke Lambda function every minute
+      - schedule: rate(1 minute)
