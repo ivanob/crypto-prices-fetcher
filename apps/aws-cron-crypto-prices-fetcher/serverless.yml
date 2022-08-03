@@ -7,10 +7,36 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs14.x
+  iamRoleStatements: # This is the permissions for the lambda to access the DynamoDB
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:us-east-1:065454142634:table/crypto-prices"
 
 functions:
   pricesHandler:
     handler: built/handler.run
+    environment:
+      CRYPTO_NAMES: bitcoin,ethereum,cardano
+      CURRENCY_BASE: usd
     events:
-      # Invoke Lambda function every minute
+      # Invoke Lambda function every day
       - schedule: rate(1 minute)
+
+resources:
+  Resources:
+    CryptoPrices: # This is the DynamoDB table to store the historical of crypto prices
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: crypto-prices
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
