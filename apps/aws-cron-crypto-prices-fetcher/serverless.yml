@@ -20,8 +20,8 @@ functions:
       CRYPTO_NAMES: bitcoin,ethereum,cardano
       CURRENCY_BASE: usd
     events:
-      # Invoke Lambda function every day
-      - schedule: rate(1 minute)
+      # Invoke Lambda function every hour
+      - schedule: rate(1 hour)
 
 resources:
   Resources:

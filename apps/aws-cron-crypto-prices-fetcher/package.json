@@ -2,20 +2,35 @@
   "name": "@monorepo/aws-cron-crypto-prices-fetcher",
   "version": "1.0.0",
   "description": "Example of creating a function that runs as a cron job using the serverless `schedule` event",
-  "author": "",
+  "author": "ivanob",
   "license": "MIT",
   "scripts": {
-    "compile": "tsc"
+    "compile": "tsc",
+    "start": "ts-node src/handler.ts",
+    "test": "node_modules/.bin/ava src/**/*.test.ts",
+    "deploy": "rm -rf ./built && npm run compile && sls deploy"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^13.13.5",
+    "@types/node-fetch": "^2.6.2",
+    "@types/sinon": "^10.0.13",
     "@types/uuid": "^8.3.4",
+    "ava": "^4.3.1",
     "aws-sdk": "^2.655.0",
+    "sinon": "^14.0.0",
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "node-fetch": "^3.2.10",
+    "node-fetch": "^2.6.7",
     "uuid": "^8.3.2"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register/transpile-only"
+    ]
   }
 }

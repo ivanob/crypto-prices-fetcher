@@ -14,10 +14,21 @@ const client = new DynamoDB.DocumentClient();
   curl -X 'GET' \
   'https://api.coingecko.com/api/v3/simple/price?ids=cardano%2Cbitcoin&vs_currencies=usd' \
   -H 'accept: application/json'
- */
 
+  The response received has this shape:
+   {
+        bitcoin: {
+            usd: 23354
+        },
+        cardano: {
+            usd: 0.509998
+        }
+    }
+ */
 const fetchCryptoCurrentData = async (cryptos: string, baseCurrency: string): Promise<any> => {
-  return await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptos}&vs_currencies=${baseCurrency}`)
+  const resp = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptos}&vs_currencies=${baseCurrency}`);
+  const respObj = await resp.json();
+  return respObj;
 }
 
 const writePriceInDB = async (crypto: string, price: number, timestamp: number) => {
@@ -33,15 +44,24 @@ const writePriceInDB = async (crypto: string, price: number, timestamp: number) 
   await client.put(params).promise();
 }
 
+export const storePrices = (
+  _writePriceInDB: (arg0: string, arg1: number, arg2: number
+) => void) => async (
+  cryptoInfo: any,
+  timestamp: number
+) => {
+  const cryptoSymbols = Object.keys(cryptoInfo) as string[];
+  console.log(`Stored price for symbols ${cryptoSymbols} at ${new Date(timestamp * 1000)}`);
+  cryptoSymbols.forEach(async (cryptoSymbol) => {
+    await _writePriceInDB(cryptoSymbol, cryptoInfo[cryptoSymbol].usd, timestamp);
+  });
+}
+
 export const run = async (event: APIGatewayProxyEvent, context: Context) => {
   const cryptoInfo = await fetchCryptoCurrentData(
     process.env.CRYPTO_NAMES,
     process.env.CURRENCY_BASE
   );
   const currentTimestamp = Math.round(Date.now() / 1000)
-  const cryptoSymbols = Object.values(cryptoInfo) as string[];
-  cryptoSymbols.forEach(async (cryptoSymbol, idx) => {
-    await writePriceInDB(cryptoSymbol, cryptoInfo[idx], currentTimestamp);
-  });
-  console.log('END')
+  storePrices(writePriceInDB)(cryptoInfo, currentTimestamp)
 };
