@@ -4,6 +4,9 @@
 - [X] Create AWS lambda function in TS
 - [X] Create DynamoDB instance via code
 - [X] Testing on lambdas: execute the lambda locally + unit testing
+- [X] Create a GraphQL server and connect it to the DynamoDB
+- [X] Learn about GraphQL internals
+
 
 
 # Overview
