@@ -3,16 +3,14 @@
 import express from "express";
 import { graphqlHTTP } from "express-graphql";
 import {
-    graphql,
-    buildSchema,
     GraphQLID,
     GraphQLString,
     GraphQLInt,
-    GraphQLBoolean,
     GraphQLObjectType,
-    GraphQLSchema
+    GraphQLSchema,
+    GraphQLList
 } from 'graphql'
-import { getItem } from "./data-layer";
+import { getItem, getItems } from "./data-layer";
 require('dotenv').config()
 
 const PORT = process.env.PORT || 3000;
@@ -39,30 +37,34 @@ const CryptoPrice = new GraphQLObjectType({
             description: 'The timestamp when the price was fetched.',
         },
     },
-    });
+});
 
 const queryType = new GraphQLObjectType({
     name: 'QueryType',
     description: 'The root query type.',
     fields: { // The fields what the things are that I can query for
-        crypto: {
-        type: CryptoPrice,
-        args: {
-            id: {
-                type: GraphQLID,
-                description: "The ID of the crypto"
-            }
+        cryptos: {
+            type: new GraphQLList(CryptoPrice),
+            resolve: getItems
         },
-        resolve: (_, args) => new Promise((resolve) => {
-            resolve(getItem(args.id));
-        }),
+        crypto: {
+            type: CryptoPrice,
+            args: {
+                id: {
+                    type: GraphQLID,
+                    description: "The ID of the crypto"
+                }
+            },
+            resolve: (_, args) => new Promise((resolve) => {
+                resolve(getItem(args.id));
+            }),
         },
     },
 });
 
 const schema = new GraphQLSchema({
     query: queryType,
-  });
+});
 
 server.use('/graphql', graphqlHTTP({
     schema,
@@ -74,6 +76,6 @@ server.listen(PORT, () => {
     console.log('GraphiQL deployed on http://localhost:3000/graphql');
 })
 // (async () => {
-//     const a = await getItem('fc29499c-23e6-4180-baeb-f90a21746998');
+//     const a = await getItems();
 //     console.log(a);
 // })();

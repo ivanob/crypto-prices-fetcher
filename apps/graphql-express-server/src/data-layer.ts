@@ -11,3 +11,12 @@ export const getItem = async (id: string) => {
     const resp = await dynamo.get(params).promise();
     return resp.Item;
 }
+
+export const getItems = async () => {
+    var params = {
+        TableName: process.env.TABLE_NAME, 
+        Select: "ALL_ATTRIBUTES"
+      };
+    const resp = await dynamo.scan(params).promise();
+    return resp.Items;
+}

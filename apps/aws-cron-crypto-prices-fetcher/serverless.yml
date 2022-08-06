@@ -21,7 +21,7 @@ functions:
       CURRENCY_BASE: usd
     events:
       # Invoke Lambda function every hour
-      - schedule: rate(1 hour)
+      - schedule: rate(60 minute)
 
 resources:
   Resources:
