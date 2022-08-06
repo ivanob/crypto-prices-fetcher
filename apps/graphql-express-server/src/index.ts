@@ -8,7 +8,8 @@ import {
     GraphQLInt,
     GraphQLObjectType,
     GraphQLSchema,
-    GraphQLList
+    GraphQLList,
+    GraphQLBoolean
 } from 'graphql'
 import { getItem, getItems } from "./data-layer";
 require('dotenv').config()
@@ -45,7 +46,19 @@ const queryType = new GraphQLObjectType({
     fields: { // The fields what the things are that I can query for
         cryptos: {
             type: new GraphQLList(CryptoPrice),
-            resolve: getItems
+            args: {
+                fromToday: {
+                    type: GraphQLBoolean,
+                    description: "return only the readings from today?"
+                }
+            },
+            resolve: async (_,args) => {
+                const currentTimestamp = Math.round(Date.now() / 1000);
+                const timestampOneDayAgo = currentTimestamp - 60*60*24;
+                return (args.fromToday) ?
+                    (await getItems()).filter(item => item.timestamp > timestampOneDayAgo)
+                    : await getItems()
+            }
         },
         crypto: {
             type: CryptoPrice,

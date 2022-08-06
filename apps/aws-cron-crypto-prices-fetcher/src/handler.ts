@@ -52,9 +52,9 @@ export const storePrices = (
 ) => {
   const cryptoSymbols = Object.keys(cryptoInfo) as string[];
   console.log(`Stored price for symbols ${cryptoSymbols} at ${new Date(timestamp * 1000)}`);
-  cryptoSymbols.forEach(async (cryptoSymbol) => {
+  await Promise.all(cryptoSymbols.map(async (cryptoSymbol) => {
     await _writePriceInDB(cryptoSymbol, cryptoInfo[cryptoSymbol].usd, timestamp);
-  });
+  }));
 }
 
 export const run = async (event: APIGatewayProxyEvent, context: Context) => {
@@ -63,5 +63,5 @@ export const run = async (event: APIGatewayProxyEvent, context: Context) => {
     process.env.CURRENCY_BASE
   );
   const currentTimestamp = Math.round(Date.now() / 1000)
-  storePrices(writePriceInDB)(cryptoInfo, currentTimestamp)
+  await storePrices(writePriceInDB)(cryptoInfo, currentTimestamp)
 };
