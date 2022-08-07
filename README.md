@@ -27,10 +27,12 @@ Can be deployed using: `npm run deploy`
 
 # graphql-express-server
 It is a express nodejs application that exposes a graphql server. It defines:
-- The Types of the data: the price readings
+- The Types of the data: the type of price readings
 - The resolvers that specify how to obtain the data (from the dynamoDB)
 - The schema that combines everything
-It exposes it via express.js in one endpoint.
+It exposes it via express.js in one endpoint. It exposes 2 queries:
+- One to fetch the readings by period of time.
+- The second to get some stats about each crypto for a specific period of time.
 Can be executed locally using: `npm run start`
 
 # client

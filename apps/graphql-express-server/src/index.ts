@@ -16,10 +16,11 @@ import {
 import { getItem, getItems } from "./data-layer";
 import { get1weekAgoTimestamp, get24hAgoTimestamp } from "./helpers";
 import {groupBy, max, min} from 'underscore';
+import cors from 'cors';
 require('dotenv').config()
 
-const PORT = process.env.PORT || 3000;
 const server = express();
+server.use(cors())
 
 const CryptoPrice = new GraphQLObjectType({
     name: 'Crypto',
@@ -153,11 +154,8 @@ server.use('/graphql', graphqlHTTP({
     graphiql: true, // Enable the graphiql tool
 }));
 
+const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
     console.log(`Listening on http://localhost:${PORT}`);
-    console.log('GraphiQL deployed on http://localhost:3000/graphql');
+    console.log(`GraphiQL deployed on http://localhost:${PORT}/graphql`);
 })
-// (async () => {
-//     const a = await getItems();
-//     console.log(a);
-// })();
