@@ -9,9 +9,13 @@ import {
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLList,
-    GraphQLBoolean
+    GraphQLBoolean,
+    GraphQLEnumType,
+    GraphQLFloat
 } from 'graphql'
 import { getItem, getItems } from "./data-layer";
+import { get1weekAgoTimestamp, get24hAgoTimestamp } from "./helpers";
+import {groupBy, max, min} from 'underscore';
 require('dotenv').config()
 
 const PORT = process.env.PORT || 3000;
@@ -30,7 +34,7 @@ const CryptoPrice = new GraphQLObjectType({
             description: 'The name of the crypto.',
         },
         price: {
-            type: GraphQLInt,
+            type: GraphQLFloat,
             description: 'The price on a specific time.',
         },
         timestamp: {
@@ -39,6 +43,49 @@ const CryptoPrice = new GraphQLObjectType({
         },
     },
 });
+
+const CryptoStats = new GraphQLObjectType({
+    name: 'Stats',
+    description: 'Stats for a specific crypto',
+    fields: {
+        crypto: {
+            type: GraphQLString,
+            description: 'The name of the crypto.',
+        },
+        highestPrice: {
+            type: GraphQLFloat,
+            description: 'The highest price for a specific period of time.',
+        },
+        lowestPrice: {
+            type: GraphQLFloat,
+            description: 'The lowest price for a specific period of time.',
+        }
+    }
+});
+
+enum enumPeriods {
+    TODAY,
+    ONE_WEEK_AGO,
+    ALL_TIMES
+}
+
+const enumTimePeriod = new GraphQLEnumType({
+    name: 'TimePeriodEnum',
+    values: {
+        TODAY: {value: enumPeriods.TODAY},
+        ONE_WEEK_AGO: {value: enumPeriods.ONE_WEEK_AGO},
+        ALL_TIMES: {value: enumPeriods.ALL_TIMES}
+    }
+});
+
+const getPeriodFilter = (period: enumPeriods) => {
+    if(period === enumPeriods.TODAY){
+        return get24hAgoTimestamp;
+    }else if(period === enumPeriods.ONE_WEEK_AGO){
+        return get1weekAgoTimestamp;
+    }
+    return () => 1;
+}
 
 const queryType = new GraphQLObjectType({
     name: 'QueryType',
@@ -53,10 +100,8 @@ const queryType = new GraphQLObjectType({
                 }
             },
             resolve: async (_,args) => {
-                const currentTimestamp = Math.round(Date.now() / 1000);
-                const timestampOneDayAgo = currentTimestamp - 60*60*24;
                 return (args.fromToday) ?
-                    (await getItems()).filter(item => item.timestamp > timestampOneDayAgo)
+                    (await getItems()).filter(item => item.timestamp > get24hAgoTimestamp())
                     : await getItems()
             }
         },
@@ -72,6 +117,30 @@ const queryType = new GraphQLObjectType({
                 resolve(getItem(args.id));
             }),
         },
+        stats: {
+            type: new GraphQLList(CryptoStats),
+            args: {
+                temp: {
+                    type: enumTimePeriod,
+                    description: "The periodicity of the search"
+                }
+            },
+            resolve: (_, args) => new Promise(async (resolve) => {
+                const allPrices = await getItems();
+                // 1- Filter by periodicity
+                const pricesFiltered = allPrices.filter(reading => reading.timestamp > getPeriodFilter(args.temp)());
+                // 2- Group by crypto name
+                const groupedCryptos = groupBy(pricesFiltered, 'crypto');
+                // 3- Calculate MAX and MIN
+                resolve(Object.keys(groupedCryptos).map(function(key, index) {
+                    const prices = groupedCryptos[key].map(x => x.price);
+                    return {
+                        crypto: key,
+                        highestPrice: max(prices),
+                        lowestPrice: min(prices)
+                }}));
+            }),
+        }
     },
 });
 
