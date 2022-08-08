@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {ApolloClient, HttpLink, gql, InMemoryCache} from '@apollo/client';
+import {ApolloClient, HttpLink, InMemoryCache, ApolloProvider} from '@apollo/client';
 
 // This client connects to our graphql server
 const client = new ApolloClient({
@@ -13,23 +13,13 @@ const client = new ApolloClient({
   })
 });
 
-const query = gql`
-  query{
-    stats(temp:ALL_TIMES){
-      crypto,
-      highestPrice,
-      lowestPrice
-    }
-  }
-`
-
-client.query({query}).then(res => console.log(res.data));
+// client.query({query}).then(res => console.log(res.data));
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  <ApolloProvider client={client}e>
     <App />
-  </React.StrictMode>
+  </ApolloProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
