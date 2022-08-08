@@ -60,6 +60,10 @@ const CryptoStats = new GraphQLObjectType({
         lowestPrice: {
             type: GraphQLFloat,
             description: 'The lowest price for a specific period of time.',
+        },
+        numberOfReadings: {
+            type: GraphQLInt,
+            description: 'The total number of readings.'
         }
     }
 });
@@ -138,7 +142,8 @@ const queryType = new GraphQLObjectType({
                     return {
                         crypto: key,
                         highestPrice: max(prices),
-                        lowestPrice: min(prices)
+                        lowestPrice: min(prices),
+                        numberOfReadings: groupedCryptos[key].length
                 }}));
             }),
         }

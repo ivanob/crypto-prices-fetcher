@@ -21,7 +21,8 @@ query findStatsByPeriodicity($periodicity: TimePeriodEnum!){
   stats(temp: $periodicity){
     crypto,
     highestPrice,
-    lowestPrice
+    lowestPrice,
+    numberOfReadings
   }
 }
 `
