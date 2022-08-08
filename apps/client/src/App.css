@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.RadioButton {
+  margin: 10px;
+}
+
+th {
+  padding: 20px;
+}
